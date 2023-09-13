@@ -1,0 +1,8 @@
+.ionTutImg{
+    width: 90%;
+    border-radius: 25px;
+
+}
+.ionTutImg+h1{
+    font-size: 0.8em;
+}
