@@ -84,7 +84,7 @@ const LoginJ = () => {
                                 doAuth();
                                 setOpenLoginModal(false);
                                 e.preventDefault()
-                                history.push('/')
+                                history.push('/home')
                             }}
                         >
                             Login

@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import emailjs, { EmailJSResponseStatus } from '@emailjs/browser';
+import Login from '../Login/Login'
 import * as AppGeneral from "../socialcalc/AppGeneral";
 import { File, Local } from "../storage/LocalStorage";
-import { isPlatform, IonToast } from "@ionic/react";
+import { isPlatform, IonToast, IonButton, IonList, IonInput } from "@ionic/react";
 import { EmailComposer } from "@ionic-native/email-composer";
 import { Printer } from "@ionic-native/printer";
 import { IonActionSheet, IonAlert } from "@ionic/react";
 import { saveOutline, save, mail, print } from "ionicons/icons";
+// import FileFormemail from './fileFormemail'
 
 const Menu: React.FC<{
   showM: boolean;
@@ -20,8 +23,20 @@ const Menu: React.FC<{
   const [showAlert3, setShowAlert3] = useState(false);
   const [showAlert4, setShowAlert4] = useState(false);
   const [showToast1, setShowToast1] = useState(false);
-  const [showAlert7, setShowAlert7] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+
+
+  emailjs.init('E3QV5yLSsjNpul7B5');
+
+  
+
+
+  useEffect(() => {
+    // Initialize EmailJS with your User ID
+    emailjs.init('E3QV5yLSsjNpul7B5');
+  }, []);
+
+
   /* Utility functions */
   const _validateName = async (filename) => {
     filename = filename.trim();
@@ -43,30 +58,6 @@ const Menu: React.FC<{
     }
     return true;
   };
-  const doSaveAsFirebase = async(filename)=>{
-    if (filename) {
-      // console.log(filename, _validateName(filename));
-      if (await _validateName(filename)) {
-        // filename valid . go on save
-        const content = encodeURIComponent(AppGeneral.getSpreadsheetContent());
-        // console.log(content);
-        const file = new File(
-          new Date().toString(),
-          new Date().toString(),
-          content,
-          filename,
-          props.bT
-        );
-        // const data = { created: file.created, modified: file.modified, content: file.content, password: file.password };
-        // console.log(JSON.stringify(data));
-        props.store._saveFileAsFir(file);
-        props.updateSelectedFile(filename);
-        setShowAlert4(true);
-      } else {
-        setShowToast1(true);
-      }
-    }
-  }
 
   const getCurrentFileName = () => {
     return props.file;
@@ -110,24 +101,6 @@ const Menu: React.FC<{
     props.updateSelectedFile(props.file);
     setShowAlert2(true);
   };
-  const doSaveonFir = () => {
-    if (props.file === "default") {
-      setShowAlert1(true);
-      return;
-    }
-    const content = encodeURIComponent(AppGeneral.getSpreadsheetContent());
-    const data = props.store._getFileFir(props.file);
-    const file = new File(
-      (data as any).created,
-      new Date().toString(),
-      content,
-      props.file,
-      props.bT
-    );
-    props.store._saveFileFir(file);
-    props.updateSelectedFile(props.file);
-    setShowAlert2(true);
-  };
 
   const doSaveAs = async (filename) => {
     // event.preventDefault();
@@ -155,69 +128,61 @@ const Menu: React.FC<{
     }
   };
 
-  const sendEmail = () => {
-    if (isPlatform("hybrid")) {
-      const emailComposer = EmailComposer;
-      emailComposer.addAlias("gmail", "com.google.android.gm");
-      const content = AppGeneral.getCurrentHTMLContent();
-      // then use alias when sending email
-      emailComposer.open({
-        app: "mailto",
-        to: "geetanshu2502@gmail.com",
-        cc: "erika@mustermann.de",
-        bcc: ["john@doe.com", "jane@doe.com"],
-        attachments: [],
-        subject: "Test mail",
-        body: content,
-        isHtml: true,
-      });
-      console.log(AppGeneral.getCurrentHTMLContent());
-    } else {
-      const mailgun = require("mailgun-js");
-      const mg = mailgun({
-        apiKey: "key-a128dfbe216c92500974c6d8ee1d4caa",
-        domain: "sandbox9e26c52330b343b3bb63ff465a74f156.mailgun.org",
-      });
-      const data = {
-        from: "Excited User <me@samples.mailgun.org>",
-        to: "geetanshu2502@gmail.com",
-        subject: "Test Mail",
-        html: AppGeneral.getCurrentHTMLContent(),
-      };
-      mg.messages().send(data, function (error, body) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent successfully");
-        }
-      });
-    }
-  };
+  // const sendEmail = () => {
+  //   if (isPlatform("hybrid")) {
+  //     const emailComposer = EmailComposer;
+  //     emailComposer.addAlias("gmail", "com.google.android.gm");
+  //     const content = AppGeneral.getCurrentHTMLContent();
+  //     // then use alias when sending email
+  //     emailComposer.open({
+  //       app: "mailto",
+  //       to: "geetanshu2502@gmail.com",
+  //       cc: "erika@mustermann.de",
+  //       bcc: ["john@doe.com", "jane@doe.com"],
+  //       attachments: [],
+  //       subject: "Test mail",
+  //       body: content,
+  //       isHtml: true,
+  //     });
+  //     console.log(AppGeneral.getCurrentHTMLContent());
+  //   } else {
+  //     const mailgun = require("mailgun-js");
+  //     const mg = mailgun({
+  //       apiKey: "key-a128dfbe216c92500974c6d8ee1d4caa",
+  //       domain: "sandbox9e26c52330b343b3bb63ff465a74f156.mailgun.org",
+  //     });
+  //     const data = {
+  //       from: "Excited User <me@samples.mailgun.org>",
+  //       to: "geetanshu2502@gmail.com",
+  //       subject: "Test Mail",
+  //       html: AppGeneral.getCurrentHTMLContent(),
+  //     };
+  //     mg.messages().send(data, function (error, body) {
+  //       if (error) {
+  //         console.log(error);
+  //       } else {
+  //         console.log("Email sent successfully");
+  //       }
+  //     });
+  //   }
+  // };
+  const [file, setFile] = useState(null);
+     
+   
+  
 
+  
   return (
+
     <React.Fragment>
+
+      
       <IonActionSheet
         animated
         keyboardClose
         isOpen={props.showM}
         onDidDismiss={() => props.setM()}
         buttons={[
-          {
-            text: "SaveAs on Firebase",
-            icon: save,
-            handler: () => {
-              setShowAlert7(true);
-              console.log("Save clicked");
-            },
-          },
-          {
-            text: "Save on Firebase",
-            icon: saveOutline,
-            handler: () => {
-              doSaveonFir();
-              console.log("Save clicked");
-            },
-          },
           {
             text: "Save",
             icon: saveOutline,
@@ -241,32 +206,7 @@ const Menu: React.FC<{
               doPrint();
               console.log("Print clicked");
             },
-          },
-          {
-            text: "Email",
-            icon: mail,
-            handler: () => {
-              sendEmail();
-              console.log("Email clicked");
-            },
-          },
-        ]}
-      />
-      <IonAlert
-        animated
-        isOpen={showAlert7}
-        onDidDismiss={() => setShowAlert7(false)}
-        header='Save As'
-        inputs={[
-          { name: "filename", type: "text", placeholder: "Enter filename" },
-        ]}
-        buttons={[
-          {
-            text: "Ok",
-            handler: (alertData) => {
-              doSaveAsFirebase(alertData.filename);
-            },
-          },
+          }
         ]}
       />
       <IonAlert
@@ -330,7 +270,7 @@ const Menu: React.FC<{
         position='bottom'
         message={toastMessage}
         duration={500}
-      />
+        />
     </React.Fragment>
   );
 };

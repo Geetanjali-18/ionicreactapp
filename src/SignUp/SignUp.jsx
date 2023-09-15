@@ -113,7 +113,7 @@ const SignUp = () => {
                                 doAuth();
                                 setOpenLoginModal(false);
                                 e.preventDefault()
-                                history.push('/')
+                                history.push('/home')
                             }}
                         >
                             Sign Up

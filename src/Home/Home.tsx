@@ -12,6 +12,8 @@ import {
     IonPopover,
     IonPage,
     IonActionSheet,
+    IonList,
+    IonInput,
 } from "@ionic/react";
 import { settings, menu, logOut } from "ionicons/icons";
 import "./Home.css"
@@ -47,8 +49,61 @@ import { useHistory } from "react-router";
 
 /* Theme variables */
 // import "../theme/variables.css";
-
+import emailjs, { EmailJSResponseStatus } from '@emailjs/browser';
+// import Sheet from "../Ssheet/Sheet";
 const Home: React.FC = () => {
+    
+    emailjs.init('E3QV5yLSsjNpul7B5');
+    
+  useEffect(() => {
+    // Initialize EmailJS with your User ID
+    emailjs.init('E3QV5yLSsjNpul7B5');
+  }, []);
+
+    
+  const showForm = () => {
+    setIsFormVisible(true);
+  };
+
+
+    
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  
+  const [recipient, setRecipient] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+
+    const sendEmail = (e) => {
+        e.preventDefault();
+        // var emailuser='';
+    
+        // Define your EmailJS service ID and template ID
+        const serviceId = 'service_ocftdic';
+        const templateId = 'template_9pcxnfq';
+    
+        // Create a template parameters object with the email content
+        const templateParams = {
+          to_email: recipient, // Replace with the recipient's email address
+          subject: subject,
+          message: message,
+        };
+        console.log(templateParams);
+    
+        // Send the email using EmailJS
+        emailjs
+          .send(serviceId, templateId, templateParams)
+          .then((response: EmailJSResponseStatus) => {
+            console.log('Email sent successfully:', response);
+            alert('Email sent successfully!');
+          })
+          .catch((error) => {
+            console.error('Error sending email:', error);
+            alert('Error sending email');
+          });
+          setIsFormVisible(false)
+      };
+
+
     const sout = useHistory()
     const [showMenu, setShowMenu] = useState(false);
     const [sett, setSett] = useState(false)
@@ -78,7 +133,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         activateFooter(billType);
     }, [billType]);
-    const closeSett = ()=>{
+    const closeSett = () => {
         setSett(false)
     }
 
@@ -108,6 +163,12 @@ const Home: React.FC = () => {
                 <IonContent>
                     <IonHeader>
                         <IonToolbar color='primary'>
+
+                            {!isFormVisible ? (
+                                <IonButton onClick={showForm}>Email</IonButton>
+                            ) : (
+                                <div></div>
+                            )}
 
                             {selectedFile === "default" ? (
                                 <IonIcon
@@ -161,16 +222,16 @@ const Home: React.FC = () => {
                                 text: "Sign Out",
                                 icon: logOut,
                                 handler: () => {
-                                    
+
                                     console.log("Signed Out Successfully");
                                     sout.push('/login')
-                                    
+
                                 },
                             },
-                            
+
                         ]}
                     />
-}
+                    }
 
                     <IonToolbar color='secondary'>
                         <IonTitle className='ion-text-center'>
@@ -192,12 +253,37 @@ const Home: React.FC = () => {
                         store={store}
                         bT={billType}
                     />
+                    {!isFormVisible ? (
+                                <div></div>
+                            ) : (
+                                <IonList>
+                                    <IonInput
+                                        type="email"
+                                        placeholder="Recipient Email"
+                                        value={recipient}
+                                        onIonChange={(e) => setRecipient(e.detail.value)}
+                                    />
+                                    <IonInput
+                                        type="text"
+                                        placeholder="Subject"
+                                        value={subject}
+                                        onIonChange={(e) => setSubject(e.detail.value)}
+                                    />
+                                    <IonInput
+                                        placeholder="Message"
+                                        value={message}
+                                        onIonChange={(e) => setMessage(e.detail.value)}
+                                    />
+                                    <IonButton onClick={sendEmail}>Send Email</IonButton>
+                                </IonList>
+                            )}
                     <div className="invoiceSection">
                         <div id='workbookControl'></div>
                         <div id='tableeditor'>editor goes here</div>
                         <div id='msg'></div>
 
                     </div>
+                    
                 </IonContent>
             </IonPage>
         </IonApp>
